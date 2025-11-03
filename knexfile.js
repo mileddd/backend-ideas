@@ -1,12 +1,12 @@
-// knexfile.js (ESM version)
+import 'dotenv/config'; // automatically loads .env
 export default {
   development: {
     client: 'pg',
     connection: {
-      host: '127.0.0.1',
-      user: 'postgres',
-      password: 'root',
-      database: 'totalcare_db'
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
     },
     migrations: {
       directory: './migrations'

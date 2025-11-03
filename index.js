@@ -17,7 +17,7 @@ app.use(cors({
 }));
 
 // Routes
-app.use("/api", userRoutes);
+app.use("/api/auth/", userRoutes);
 
 app.use('/api', authMiddleware, ideaRoutes);
 
