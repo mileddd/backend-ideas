@@ -4,10 +4,15 @@ import userRoutes from "./src/routes/user-routes.js";
 import ideaRoutes from './src/routes/idea-routes.js';
 import authMiddleware from './src/middleware/auth-middleware.js';
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
 
 dotenv.config();
 
 const app = express();
+
+const swaggerDocument = YAML.load('./openapi.yaml'); // 👈 loads your spec
+
 app.use(express.json());
 
 app.use(cors({
@@ -16,10 +21,13 @@ app.use(cors({
   credentials: true
 }));
 
+
 // Routes
 app.use("/api/auth/", userRoutes);
-
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api', authMiddleware, ideaRoutes);
+
+
 
 // Default route
 app.get("/", (req, res) => {
