@@ -7,17 +7,17 @@ export async function seed(knex) {
     {
       title: 'Implement dark mode',
       description: 'Add a toggle to switch between light and dark themes.',
-      vote_count: 5,
+      vote_count: 0,
     },
     {
       title: 'Add search functionality',
       description: 'Enable users to search through ideas easily.',
-      vote_count: 3,
+      vote_count: 0,
     },
     {
       title: 'Improve performance',
       description: 'Optimize queries and frontend rendering for faster load times.',
-      vote_count: 7,
+      vote_count: 0,
     },
   ]);
 }
