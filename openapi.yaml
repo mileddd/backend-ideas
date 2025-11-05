@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Ideas API
-  version: 1.0.0
+  version: 1.0.1
   description: API documentation for the Ideas platform (with authentication)
 
 servers:
@@ -67,9 +67,59 @@ paths:
         "500":
           description: Server error
 
+  /auth/getUserInfo:
+    get:
+      summary: Get current authenticated user info
+      description: Returns the logged-in user's info based on the provided JWT token
+      tags:
+        - Auth
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User info retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  username:
+                    type: string
+                    example: testuser
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: 2025-11-04T09:30:00Z
+        "401":
+          description: Unauthorized or missing token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Authorization header missing
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User not found
+        "500":
+          description: Server error
+
   /ideas:
     get:
       summary: Get all ideas
+      description: Returns a list of ideas sorted by vote count. If authenticated, includes `userVote` for the logged-in user.
       tags:
         - Ideas
       security:
@@ -82,24 +132,12 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                      example: 1
-                    title:
-                      type: string
-                      example: Improve the UX
-                    description:
-                      type: string
-                      example: Add dark mode support
-                    vote_count:
-                      type: integer
-                      example: 5
-        "401":
-          description: Unauthorized
+                  $ref: "#/components/schemas/Idea"
+        "500":
+          description: Server error
     post:
       summary: Create a new idea
+      description: Adds a new idea to the database.
       tags:
         - Ideas
       security:
@@ -123,8 +161,74 @@ paths:
       responses:
         "201":
           description: Idea created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Idea"
         "400":
           description: Missing required fields
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Title and description are required
+        "401":
+          description: Unauthorized
+        "500":
+          description: Server error
+
+  /ideas/{id}/upvote:
+    post:
+      summary: Upvote an idea
+      description: Adds or toggles an upvote for the authenticated user.  
+      tags:
+        - Votes
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID of the idea to upvote
+      responses:
+        "200":
+          description: Updated idea after upvote
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Idea"
+        "401":
+          description: Unauthorized
+        "500":
+          description: Server error
+
+  /ideas/{id}/downvote:
+    post:
+      summary: Downvote an idea
+      description: Adds or toggles a downvote for the authenticated user.
+      tags:
+        - Votes
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID of the idea to downvote
+      responses:
+        "200":
+          description: Updated idea after downvote
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Idea"
         "401":
           description: Unauthorized
         "500":
@@ -136,3 +240,28 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
+  schemas:
+    Idea:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Improve the UX
+        description:
+          type: string
+          example: Add dark mode support
+        vote_count:
+          type: integer
+          example: 5
+        userVote:
+          type: integer
+          description: Current user's vote (1 for upvote, -1 for downvote, 0 for none)
+          example: 1
+        created_at:
+          type: string
+          format: date-time
+          example: 2025-11-04T09:30:00Z

@@ -23,7 +23,7 @@ app.use(cors({
 
 
 // Routes
-app.use("/api/auth/", userRoutes);
+app.use("/api/auth", userRoutes);
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api', authMiddleware, ideaRoutes);
 
